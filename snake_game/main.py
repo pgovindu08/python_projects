@@ -38,8 +38,8 @@ while game_is_on:
         scoreboard.increase_score()
 
     if snake.hit_wall() or snake.hit_tail():
-        game_is_on = False
-        scoreboard.game_over()
+        scoreboard.reset()
+        snake.reset()
 
 screen.title("My Snake Game")
 screen.exitonclick()
