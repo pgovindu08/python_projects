@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from random import randint,choice,shuffle
 import pyperclip
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
@@ -27,23 +28,49 @@ def pasword_genarator():
     pyperclip.paste()
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
+new_data = {}
 
 def save():
+    global new_data
     web_name = website_input.get()
     gmail = email_input.get()
     password_name = password_input.get()
+    new_data = {web_name: {
+        "email": gmail,
+        "password": password_name
+    }}
 
     if len(web_name) == 0 or len(password_name) == 0:
         messagebox.showwarning(title="Ooops", message="Please don't leave any fields empty!")
-        return None
-
-    is_ok = messagebox.askokcancel(title=web_name, message=f"These are the details entered: \nEmail: {gmail}\nWebsite: {web_name}\nPassword: {password_name}\n Is it okay to save?")
-
-    if is_ok:
-        with open("data.txt", "a") as file:
-            file.write(f"{web_name} | {gmail} | {password_name}\n")
+    else:
+        try:
+            with open("data.json", "r") as data_file:
+                data = json.load(data_file)
+                data.update(new_data)
+        except FileNotFoundError:
+            with open("data.json","w") as data_file:
+                json.dump(new_data, data_file, indent=4)
+        else:
+            with open("data.json","w") as data_file:
+                json.dump(data, data_file, indent=4)
+        finally:
             website_input.delete(0,END)
             password_input.delete(0,END)
+
+def search_password():
+    web_page = website_input.get().title()
+    try:
+        with open("data.json") as data_file:
+            password_data = json.load(data_file)
+    except FileNotFoundError:
+        messagebox.showinfo(message="No Data File Found")
+    else:
+        if web_page in password_data:
+            gmail = password_data[web_page]["email"]
+            pass_code = password_data[web_page]["password"]
+            messagebox.showinfo(title="Passwor Info", message=f"Gmail: {gmail}\nPassword: {pass_code}")
+        else:
+            messagebox.showinfo(title="Passwor Info", message=f"No details on {web_page} exists")
     
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -61,9 +88,12 @@ canvas.grid(row=0, column=1)
 website_name = Label(text="Website:")
 website_name.grid(column=0,row=1)
 
-website_input = Entry(width=35)
-website_input.grid(column=1,row=1,columnspan=2, sticky="EW")
+website_input = Entry(width=21)
+website_input.grid(column=1,row=1, sticky="EW")
 website_input.focus()
+
+search_button = Button(text="Search", command=search_password)
+search_button.grid(row=1, column=2, sticky="EW")
 
 email_name = Label(text="Email/Username:")
 email_name.grid(column=0,row=2)
