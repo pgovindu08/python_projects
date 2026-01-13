@@ -1,14 +1,15 @@
 from tkinter import *
 import math
 
+
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#e2979c"
 RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 1
-SHORT_BREAK_MIN = 0.5
+WORK_MIN = 25
+SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
 timer = None
@@ -17,6 +18,7 @@ timer = None
 
 def reset_timer():
     global reps
+    window.attributes('-topmost', 0)
     window.after_cancel(timer)
     canvas.itemconfig(timer_text, text="00:00")
     title.config(text="Timer")
@@ -49,6 +51,10 @@ def start_timer():
 
 def count_down(count):
     global timer
+    if count < 10:
+        window.attributes('-topmost', 1)
+    else:
+        window.attributes('-topmost', 0)
     minute = int(math.floor(count/60))
     seconds = int(count % 60)
     if seconds < 10:
@@ -58,6 +64,7 @@ def count_down(count):
     if count > 0:
         timer = window.after(1000, count_down, count-1)
     else:
+        window.bell()
         start_timer()
         marks=""
         work_sessions = math.floor(reps/2)
